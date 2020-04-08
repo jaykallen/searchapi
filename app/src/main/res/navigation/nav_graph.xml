@@ -17,10 +17,10 @@
         android:id="@+id/resultsFragment"
         android:name="com.jaykallen.searchapi.ui.ResultsFragment"
         android:label="ResultsFragment">
-<!--        <argument-->
-<!--            android:name="choice"-->
-<!--            app:argType="com.jaykallen.searchapi.model.Team"-->
-<!--            app:nullable="true" />-->
+        <argument
+            android:name="choice"
+            app:argType="com.jaykallen.searchapi.model.Team"
+            app:nullable="true" />
     </fragment>
 
 </navigation>

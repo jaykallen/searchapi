@@ -13,18 +13,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.jaykallen.searchapi.R
 import com.jaykallen.searchapi.internet.RestManager
 import com.jaykallen.searchapi.model.Team
-import com.jaykallen.searchapi.model.TeamChosen
 import com.jaykallen.searchapi.viewmodel.HomeViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
 
-// This is a take home assignment given to me by Reachmobi on 03/27/2020
-// track a person’s favorite sports team and look up their game history
-// Implement a search functionality to allow users to query results from the API
-// tracking and analytics to determine how your users are using your app. How would you approach this?
-// Firebase and / or Flurry
-// Monetization strategies?
-// Provide ad network with the team name chosen
-// Request age / gender of user (if personalized ads allowed)
+// todo Ryan's Suggestion: Add unit tests
 
 class HomeFragment : Fragment() {
     private lateinit var recyclerAdapter: HomeAdapter
@@ -42,8 +34,9 @@ class HomeFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         println("***************** Home Fragment *******************")
         homeViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
-        homeViewModel.observeLiveData(this)
+//        homeViewModel.observeLiveData(this)
         setSearchViewListener()
+        observeData()
     }
 
     private fun setSearchViewListener() {
@@ -55,18 +48,25 @@ class HomeFragment : Fragment() {
                 return false
             }
             override fun onQueryTextChange(newText: String): Boolean {
+                if (!newText.isNullOrBlank()) {
+                    getTeams(newText)
+                }
                 return false
             }
         })
     }
 
-    private fun getTeams(input: String) {
-        println("Get Teams Initiated")
-        RestManager.getSpecificName(input)
+    private fun observeData() {
         homeViewModel.teamsLiveData.observe(viewLifecycleOwner, Observer { teamsData ->
             println("Team Data received $teamsData")
             setupRecycler(teamsData)
         })
+    }
+
+
+    private fun getTeams(input: String) {
+        println("Get Teams Initiated")
+        RestManager.getSpecificName(input)  // todo through the viewmodel
     }
 
     private fun setupRecycler(itemList: ArrayList<Team>) {
@@ -79,11 +79,12 @@ class HomeFragment : Fragment() {
 
     private fun choiceClicked(chosen: Team) {
         println("User clicked: ${chosen.strTeam}")
-        homeViewModel.choice = chosen       // Pass object through viewmodel??
-        TeamChosen.teamChosen = chosen      // Pass object with data object (Ryan will hate this)
-//        val action = HomeFragmentDirections.actionHomeFragmentToResultsFragment(chosen)
-//        Navigation.findNavController(view!!).navigate(action)  // Pass object through safe args??
-        Navigation.findNavController(view!!).navigate(R.id.action_homeFragment_to_resultsFragment)
+        val action = HomeFragmentDirections.actionHomeFragmentToResultsFragment(chosen)
+        view?.let {
+            Navigation.findNavController(it).navigate(action)
+        }
+        // go to results fragement without safe args:
+//        Navigation.findNavController(view!!).navigate(R.id.action_homeFragment_to_resultsFragment)
     }
 
 }

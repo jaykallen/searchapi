@@ -2,6 +2,7 @@ package com.jaykallen.searchapi.internet
 
 import androidx.lifecycle.MutableLiveData
 import com.google.gson.GsonBuilder
+import com.jaykallen.searchapi.model.Team
 import com.jaykallen.searchapi.model.Teams
 import retrofit2.Call
 import retrofit2.Callback
@@ -11,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RestManager {
     private const val BASE_URL = "https://www.thesportsdb.com"
-    var mutableLiveData = MutableLiveData<Teams>()
+    var mutableLiveData = MutableLiveData<ArrayList<Team>>()
 
     fun getSpecificName(input: String) {
         val service = initiateRetrofit()
@@ -21,12 +22,25 @@ object RestManager {
             override fun onResponse(call: Call<Teams>, response: Response<Teams>) {
                 println("Successful Query: " + response.body())
                 val teams = response.body()
-                mutableLiveData.value = teams
+                if (teams != null) {
+                    parseTeams(teams)
+                }
             }
             override fun onFailure(call: Call<Teams>, t: Throwable) {
                 println("Failed Call: $t")
             }
         })
+    }
+
+    private fun parseTeams(teams: Teams) {
+        val teamList = ArrayList<Team>()
+        val teamsReceived = teams.teams
+        if (teamsReceived != null) {
+            if (teamsReceived.isNotEmpty()) {
+                teamList.addAll(teamsReceived)
+            }
+        }
+        mutableLiveData.value = teamList
     }
 
     fun getAllNames(input: String) {
@@ -37,7 +51,6 @@ object RestManager {
                 override fun onResponse(call: Call<Teams>, response: Response<Teams>) {
                     println("Successful Query: " + response.body())
                     val teams = response.body()
-                    mutableLiveData.value = teams
                 }
                 override fun onFailure(call: Call<Teams>, t: Throwable) {
                     println("Failed Call: $t")
